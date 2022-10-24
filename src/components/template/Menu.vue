@@ -136,6 +136,33 @@
           </div>
         </div>
       </li>
+      <li class="nav-item" v-if="user.rol.grado <= 1">
+        <router-link
+          class="nav-link collapsed"
+          to="#"
+          data-toggle="collapse"
+          data-target="#collapseConfig"
+          aria-expanded="true"
+          aria-controls="collapseUtilities"
+        >
+          <i class="fas fa-user mr-3"></i>
+          <span>Configuracion</span>
+        </router-link>
+
+        <div
+          id="collapseConfig"
+          class="collapse"
+          aria-labelledby="headingUtilities"
+          data-parent="#accordionSidebar"
+        >
+          <div class="bg-white py-2 collapse-inner rounded">
+            <router-link class="collapse-item" to="/manager/categorias"
+              >categorias</router-link
+            >
+            
+          </div>
+        </div>
+      </li>
     </ul>
   </div>
 </template>

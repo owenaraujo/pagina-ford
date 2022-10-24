@@ -1,7 +1,7 @@
 <template>
     
 
-    <div class="scrollbar-light-blue" style="overflow-y:auto; height: 100vh;">
+    <div class="scrollbar-light-blue" style="overflow-y:auto; overflow-x: ; height: 100vh;">
 
 <!-- ======= Hero Section ======= -->
 <section id="hero" class="hero">
@@ -70,7 +70,7 @@
 
       </p>
 
-      <div class="row stats-row">
+      <div class="row stats-row justify-content-center">
         <div  v-for="item in categorias" :key="item._id" class="stats-col text-center col-md-3 col-sm-6">
           <div  class="circle">
             <span data-purecounter-start="0"  data-purecounter-end="232" data-purecounter-duration="1" class="purecounter stats-no">+{{item.cantidad}}</span>
@@ -85,9 +85,9 @@
 
   <!-- ======= Welcome Section ======= -->
   <section class="welcome text-center ">
-    <h2>Welcome to a perfect theme</h2>
+    <h2></h2>
     <p>
-      This is the most powerful theme with thousands of options that you have never seen before.
+     
     </p>
     <img alt="Bell - A perfect theme" class="d-none" src="https://st2.depositphotos.com/1001335/10309/i/600/depositphotos_103091044-stock-photo-border-of-auto-parts-on.jpg">
   </section><!-- End Welcome Section -->
@@ -257,22 +257,22 @@
 
 <!-- seccion buscar -->
 
-      <div class="d- d-none" style="flex-direction:row-reverse">
-  <select name="" id="" class="form-control mr-3" style="max-width: 100px;">
-    <option selected value="">mostrar</option>
-    <option selected value="">10</option>
-    <option selected value="">20</option>
-    <option selected value="">30</option>
+      <div class="d-flex" style="flex-direction:row-reverse">
+  <select v-model="limit" name=""  @change="getProducts" class="form-control mr-3" style="max-width: 100px;">
+    <option  :value="5">mostrar</option>
+    <option  :value="10">10</option>
+    <option  :value="20">20</option>
+    <option  :value="30">30</option>
   </select>
   <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
   <div class="btn-group mr-2" role="group" aria-label="First group">
-    <button type="button" class="btn btn-primary">
+    <button type="button" class="btn btn-primary" @click="getProducts">
       <i class="fa fa-search"></i>
     </button>
    
   </div>
 </div>
-  <input type="text" class="form-control" placeholder="buscar" style="max-width: 150px">
+  <input v-on:keypress.enter="getProducts" v-model="textSearch" type="text" class="form-control" placeholder="buscar" style="max-width: 150px">
   
 </div>
     </div>
@@ -297,6 +297,7 @@
             <a  class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" :src="item.img">
             
             </a>
+            
           </div>
           </div>
           
@@ -304,7 +305,6 @@
         </div>
         
 
-       
        
 
        
@@ -314,6 +314,45 @@
 
       
     </div>
+    <div class="mb-2">
+  
+  <nav aria-label="..." class="text-center" style=" align-items: center;
+  justify-content: center;">
+            <ul class="pagination justify-content-center">
+              <div
+                class="page-item"
+                :class="{ disabled: page == 1 }"
+                @click="previous"
+              >
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true"
+                  >Previous</a
+                >
+              </div>
+              
+              <div class="pagination scroll scrollbar-light-blue">
+                <div
+                  v-for="(item, index) in lista"
+                  :key="index"
+                  class="page-item"
+                  :class="{ active: page == item }"
+                  @click="getProducts(item)"
+                >
+                  <a class="page-link">{{ item }}</a>
+                </div>
+              </div>
+
+              <li
+                class="page-item"
+                @click="next"
+                :class="{
+                  disabled: lista.length === page || limit === undefined,
+                }"
+              >
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+</div>
   </section><!-- End Portfolio Section -->
 
   <!-- ======= Team Section ======= -->
@@ -428,16 +467,15 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 text-center">
-          <h2 class="section-title">contacta con nosotros</h2>
+          <h2 class="section-title">Contacta con nosotros</h2>
         </div>
       </div>
 
       <div class="d-flex justify-content-center " style="font-size: 50px">
-
        
         
-        <a @click="irUrl(`https://api.whatsapp.com/send/?phone=%2B584126990009&text&type=phone_number&app_absent=0`)" class="" ><i class="fab fa-whatsapp p-2"></i></a>
-        <a @click="irUrl(`https://www.instagram.com/elmagodelaford/`)" class=""><i class="fab fa-instagram p-2"></i></a>
+        <a @click="irUrl(`https://api.whatsapp.com/send/?phone=%2B584126990009&text&type=phone_number&app_absent=0`)" class="ov-btn-slide-close" ><i class="fab fa-whatsapp p-2"></i></a>
+        <a @click="irUrl(`https://www.instagram.com/elmagodelaford/`)" class="ov-btn-slide-close"><i class="fab fa-instagram p-2"></i></a>
 
         
 
@@ -514,13 +552,31 @@ import { useStore } from "vuex"
 export default{
   setup(){
     const store = useStore()
+    let textSearch = ref("")
+    let lista = ref([]);
+    
+    let limit = ref(5)
+    let page = ref(2)
     function irUrl(url) {
       
       window.open(url, '_blank')
     }
-    async function getProducts() {
-      const {data} =await axios.get(`${store.state.api}/productos/activos`)
-catalogo.value = data
+    async function getProducts(P) { 
+
+      page.value= P
+      const {data} =await axios.get(`${store.state.api}/productos/activos?Name=${textSearch.value}&limit=${limit.value}&page=${page.value}`)
+      if (data.length== 0) {
+        page.value =1
+        getProducts
+      }
+      
+catalogo.value = data.productos
+lista.value = [];
+
+for (let index = 0; index < data.count / limit.value; index++) {
+        const element = index + 1;
+        lista.value.push(element);
+      }
     }
     async function getCategorias() {
       const {data} =await axios.get(`${store.state.api}/categorias/limit/4`)
@@ -530,7 +586,7 @@ categorias.value = data
     getCategorias()
     let catalogo = ref()
     let categorias = ref()
-    return{categorias, catalogo, irUrl}
+    return{categorias, catalogo, irUrl,textSearch,getProducts, limit, lista, page}
   }
 }
 
@@ -542,10 +598,59 @@ categorias.value = data
 <script src="/index/vendor/php-email-form/validate.js"></script> -->
 
 <style scoped>
+/*** ESTILOS BOTÓN SLIDE CLOSE ***/
+.ov-btn-slide-close {
+  color: #0000007c; /* color de fuente */
+  padding: 16px 20px;
+  border-radius: 3px; /* redondear bordes */
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  display: inline-block;
+}
+.ov-btn-slide-close:before, .ov-btn-slide-close:after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  top: 0;
+  left: -50%;
+  
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+.ov-btn-slide-close:after {
+  left: 100%;
+}
+.ov-btn-slide-close:hover {
+  font-size: 60px;
+  padding: 6px 10px;
+
+  color: #199EB8; /* color de fuente hover */
+}
+.ov-btn-slide-close:hover:before {
+  left: 0;
+}
+.ov-btn-slide-close:hover:after {
+  left: 50%;
+}
+@media (min-width: 800px) {
+  .card-columns {
+    -moz-column-count: 3;
+    column-count: 7;
+    -moz-column-gap: 1.25rem;
+    column-gap: 1.25rem;
+    orphans: 1;
+    widows: 1;
+  }
+}
+
 @media (min-width: 576px) {
   .card-columns {
     -moz-column-count: 3;
-    column-count: 5;
+    column-count: 7;
     -moz-column-gap: 1.25rem;
     column-gap: 1.25rem;
     orphans: 1;

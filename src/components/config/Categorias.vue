@@ -44,7 +44,23 @@
                <tr v-for="item in categorias" :key="item._id">
                 <th>{{item.nombre}}</th>
                 <th>{{item.cantidad}}</th>
-                <th></th>
+                <th>
+                  <button
+          v-show="item.status"
+          @click="desactivarCategoria(item._id)"
+          class="btn btn-danger ml-2"
+        >
+          <i class="fa fa-eye-slash"></i>
+        </button>
+
+        <button
+          v-show="!item.status"
+          @click="activarCategoria(item._id)"
+          class="btn btn-success ml-2"
+        >
+          <i class=" fa fa-eye"></i>
+        </button>
+                </th>
                </tr>
               </tbody>
             </table>
