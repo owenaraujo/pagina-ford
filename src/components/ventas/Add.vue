@@ -53,7 +53,12 @@
                         :key="item._id"
                         :value="item._id"
                         v-show="
+
                           item.id_product.codigo
+                            .toLowerCase()
+                            .indexOf(buscarProducto.toLowerCase()) != -1 ||
+                            
+                          item.id_product.descripcion
                             .toLowerCase()
                             .indexOf(buscarProducto.toLowerCase()) != -1
                         "

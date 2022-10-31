@@ -30,7 +30,7 @@
                 name="categoria"
                 class="form-control"
               >
-               <option v-for="item in categorias" :key="item._id" :value="item._id" >{{item.nombre}}</option>
+               <option v-for="item in categorias" v-show="item.status === true" :key="item._id" :value="item._id" >{{item.nombre}}</option>
               </select>
             </div>
             <div class="mb-2" v-for="(item, index) of form" :key="index">

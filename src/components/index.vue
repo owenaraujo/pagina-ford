@@ -259,10 +259,10 @@
 
       <div class="d-flex" style="flex-direction:row-reverse">
   <select v-model="limit" name=""  @change="getProducts" class="form-control mr-3" style="max-width: 100px;">
-    <option  :value="5">mostrar</option>
-    <option  :value="10">10</option>
+    <option  :value="10">mostrar</option>
     <option  :value="20">20</option>
-    <option  :value="30">30</option>
+    <option  :value="50">50</option>
+    <option  :value="100">100</option>
   </select>
   <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
   <div class="btn-group mr-2" role="group" aria-label="First group">
@@ -272,33 +272,37 @@
    
   </div>
 </div>
-  <input v-on:keypress.enter="getProducts" v-model="textSearch" type="text" class="form-control" placeholder="buscar" style="max-width: 150px">
+  <input v-on:keypress.enter="getProducts" v-model="textSearch" type="text" class="form-control mr-2" placeholder="buscar" style="max-width: 200px">
   
 </div>
     </div>
 
-    <div class="portfolio-grid container-fluid">
-      <div class="row">
+    <div class="portfolio-grid container-fluid mt-4" >
+      <div class="row card-columns">
                
                
-        <div class="card-columns">
-          <div  v-for="item in catalogo" :key="item" >
-          <div class="">
-            <div class="card p-4">
+        <div class=" mt-2 mb-2" v-for="item in catalogo" :key="item">
+          <div   >
+          <div class="card">
+            <div class=" p-4" style="height:90% ;">
+              <img alt="" style="height: 25vh; max-width:25vh;margin-left: auto;
+  margin-right: auto; display: block;" class="card-img-top" :src="item.img">
+              <div>
+                
               <div>
                   <h5 class="card-title ">
                     {{item.codigo}}
                   </h5>
 
-                  <h3 class="card-text text-dark">
+                  <h3 class="card-text text-dark" style="max-width:40vh ;">
                     {{item.descripcion}}
                   </h3>
                 </div>
-            <a  class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" :src="item.img">
-            
-            </a>
-            
-          </div>
+                
+              </div>
+              
+            </div>
+            <div class="text-right mb-4 mr-4">cantidad</div>
           </div>
           
         </div>
@@ -555,8 +559,8 @@ export default{
     let textSearch = ref("")
     let lista = ref([]);
     
-    let limit = ref(5)
-    let page = ref(2)
+    let limit = ref(10)
+    let page = ref(1)
     function irUrl(url) {
       
       window.open(url, '_blank')

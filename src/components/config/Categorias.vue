@@ -20,7 +20,8 @@
                 id="categoria"
               />
             </div>
-            <button class="btn btn-primary" @click.prevent="save">guardar</button>
+            <button v-show="info._id" class="btn btn-primary" @click.prevent="save(info)">editar</button>
+            <button v-show="!info._id" class="btn btn-primary" @click.prevent="save(false)">guardar</button>
           </form>
         </div>
       </div>
@@ -47,7 +48,7 @@
                 <th>
                   <button
           v-show="item.status"
-          @click="desactivarCategoria(item._id)"
+          @click="save({_id:item._id, status: false})"
           class="btn btn-danger ml-2"
         >
           <i class="fa fa-eye-slash"></i>
@@ -55,10 +56,17 @@
 
         <button
           v-show="!item.status"
-          @click="activarCategoria(item._id)"
+          @click="save({_id:item._id, status: true})"
           class="btn btn-success ml-2"
         >
           <i class=" fa fa-eye"></i>
+        </button>
+        <button
+          
+          @click="edit(item)"
+          class="btn btn-warning ml-2"
+        >
+          <i class=" fa fa-pencil"></i>
         </button>
                 </th>
                </tr>
@@ -81,16 +89,29 @@ export default {
   setup() {
     let store = useStore()
  store.dispatch('buscar')
-   
+   function edit(datos) {
+    info.value = datos
+   }
  let categorias = ref()
   let info = ref({nombre: null});
     let api = computed(()=> store.state.api)
   let toast = computed(()=> store.state.toask)
-   async function save() {
-   
-    const {data} = await axios.post(`${api.value}/categorias`, info.value)
-    createToast(data.value, toast.value.success)
+   async function save(datos) {
+     let data = {}
+   if (datos) {
+    const result = await axios.post(`${api.value}/categorias/${datos._id}`, datos)
+    data = result.data
+
+   }
+   else{
+    if (!info.value) return
+     const result2 = await axios.post(`${api.value}/categorias`, info.value)
+     data = result2.data
+    }
+    info.value = ""
     getCategorias()
+    createToast(data.value, toast.value.success)
+   
   }
   async function getCategorias() {
       const {data} = await axios.get(`${api.value}/categorias`)
@@ -102,7 +123,7 @@ export default {
       store.dispatch("generarPdf")
     }
   
-    return { pdf, info, save, categorias };
+    return { pdf, info, save, categorias, edit };
   },
 };
 </script>
