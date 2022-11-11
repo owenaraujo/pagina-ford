@@ -4,6 +4,7 @@
     <th>{{ producto.productName }}</th>
     
     <th>{{ producto.cantidad }}</th>
+    <th>{{ producto.precio }}</th>
     
   
 

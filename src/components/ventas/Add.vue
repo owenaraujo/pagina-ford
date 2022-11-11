@@ -33,6 +33,7 @@
                 <!-- <th width="100px">IVA</th> -->
                 <!-- <th class="textright">Precio</th> -->
                 <!-- <th class="textright">Precio Total</th> -->
+                <th></th>
                 <th>Acciones</th>
               </tr>
               <tr>
@@ -73,6 +74,7 @@
                 </td>
                 <td id="txt_existencia">{{ inputsAgregar.cantidad || 0 }}</td>
 
+                <td></td>
                 <td>
                   <button
                     @click="agregarCarrito()"
@@ -93,17 +95,34 @@
                 <th>cantidad</th>
                 <!-- <th class="textright">Precio</th> -->
                 <!-- <th class="textright">Precio Total</th> -->
+                <th>precio</th>
                 <th>Acciones</th>
               </tr>
             </thead>
            
             <tbody id="detalle_venta">
-              <ListProductos
-                v-for="(producto, index) in productosVenta"
-                :indice="index"
-                :key="index"
-                :producto="producto"
-              />
+              <tr v-for="(producto, index) in productosVenta" :key="index">
+    <th>{{ producto.codigo }}</th>
+    <th>{{ producto.productName }}</th>
+    
+    <th>{{ producto.cantidad }}</th>
+    <th>
+<div class="d-flex align-items-center">
+  <input type="number" class="form-control mr-2" style="max-width: 100px;" v-model.number="producto.precio"> =  {{producto.precio* producto.cantidad}}
+
+</div>
+    </th>
+    
+  
+
+    
+    <th>
+      <button @click="deleteProduct(indice)" class="btn btn-danger">
+        <i class="svg-inline--fa fas fa-trash-alt fa-w-14"></i> Eliminar
+      </button>
+    </th>
+  </tr>
+            
             </tbody>
           </table>
         </div>
@@ -222,11 +241,10 @@ import NoAccess from "../403.vue";
 import axios from "axios";
 import { useStore } from "vuex";
 import { computed, ref } from "@vue/reactivity";
-import ListProductos from "./listProductsVenta.vue";
 import { createToast } from "mosha-vue-toastify";
 export default {
   props: ["param"],
-  components: { ListProductos, NoAccess },
+  components: {  NoAccess },
   setup() {
     //respuestas automaticas
     let store = useStore();
@@ -311,7 +329,7 @@ export default {
       
       const data = {
         productName: inputsAgregar.value.id_product.descripcion,
-        precio: inputsAgregar.value.id_product.precio,
+        
         codigo: inputsAgregar.value.id_product.codigo,
         cantidad: cantidad.value,
         producto_id: inputsAgregar.value.id_product._id,

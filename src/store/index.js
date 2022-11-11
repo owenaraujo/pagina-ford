@@ -29,7 +29,7 @@ export default createStore({
         username: null
       },
 
-      factura: null,
+      factura: false,
       productos: [
         {
           precio: null,
@@ -91,6 +91,7 @@ export default createStore({
     usuario: {
       rol: { grado: null }
     },
+    abonos : [],
     ventas: [],
     clientesActivos: [],
     productosTrue: [],
@@ -102,12 +103,17 @@ export default createStore({
     system: { id: "", info: { dolar: "" } },
   },
   mutations: {
-    CerrarFactura(state) {
-      state.modalInfo = false
+    CerrarModalAbonos(state) {
+      state.modalInfo = !state.modalInfo
     },
-    MostrarFactura(state, payload) {
+ async   MostrarFactura(state, payload) {
       state.factura = payload
-      state.modalInfo = true
+      console.log(payload._id);
+      const {data}= await axios.get(`${state.api}/ventas/abonos/${payload._id}`)
+      state.abonos = data
+      
+
+      // state.modalInfo = true
     },
     saveCliente(state, payload) {
       state.datosCliente = payload;
@@ -461,7 +467,7 @@ export default createStore({
       commit("MostrarFactura", e)
     },
     cerrarModalInfo() {
-      this.commit("CerrarFactura")
+      this.commit("CerrarModalAbonos")
     }
   },
   modules: {},

@@ -2,7 +2,7 @@
 <div>
     <div v-if="modalInfo">
     <div
-      class="modal fade show"
+      class="modal fade show "
       id="staticBackdrop"
       data-backdrop="static"
       data-keyboard="false"
@@ -11,7 +11,7 @@
       style="display: block"
       aria-modal="true"
     >
-      <div class="modal-dialog modal-center">
+      <div class="modal-dialog modal-center modal-sm">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
@@ -26,21 +26,25 @@
             </button>
           </div>
           <div class="modal-body">
-            <h5 v-if="venta.user_id">Creada por : {{ venta.user_id.username ||0}}</h5>
-            <h5 v-if="venta.pago">tipo de pago : {{ venta.pago ||0}}</h5>
-            <h5 v-if="venta.nota">nota : {{ venta.nota ||0}}</h5>
-            <span>
-              fecha: <strong>{{ formatTime(venta.createdAt)||0 }}</strong>
-            </span>
-			<p>productos:</p>
-			<ul>
-				<li v-for="(item, index) of venta.productos" :key="index" >
-					<p v-if="item.producto_id">{{item.producto_id.descripcion ||null + "-"+item.producto_id.codigo ||0}} </p>
-          cantidad: {{item.cantidad ||0}}
-					
-				</li>
-			</ul>
-			<!-- total : {{numeralFormat(total * venta.dolar)}} ({{total}}$) -->
+            <div v-if="abonos.length <= 0">
+            <h4 class="text-center"> no hay abonos</h4>
+            </div>
+<ul>
+  <li v-for="(item, index) in abonos" :key="index">
+  ${{item.cantidad}}- {{formatTime(item.createdAt)}}</li>
+</ul>
+
+
+
+
+
+         
+			
+
+   
+
+		
+			
           </div>
           <div class="modal-footer">
             <button
@@ -73,8 +77,8 @@ store.dispatch("cerrarModalInfo")
     }
             const store = useStore()
             const modalInfo = computed(()=>store.state.modalInfo)
-            const venta = computed(()=>store.state.factura)
-            return{modalInfo,venta, formatTime,cerrarFactura}
+            const abonos = computed(()=>store.state.abonos)
+            return{modalInfo,abonos, formatTime,cerrarFactura}
         }
     }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="menu">
     <ul
       :class="{ oculto: sidebars }"
       class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"

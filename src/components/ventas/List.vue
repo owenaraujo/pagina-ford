@@ -49,15 +49,16 @@
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered" id="table">
+    <div class="row" >
+      <div class=" col col-lg-6">
+        <div class="table-responsive" style="min-height:70vh">
+          <table class="table  table-bordered" id="table" >
             <thead class="thead-dark">
               <tr>
                 <th># factura</th>
                 <th>Fecha</th>
-                <!-- <th>Total</th> -->
+                <th>cantidad de articulos</th>
+               
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -109,6 +110,65 @@
           </nav>
         </div>
       </div>
+      <div class="col col-lg-6">
+        <div class="card " style="min-height:70vh">
+          
+          <div class="card-body" v-if="factura._id">
+
+
+
+
+
+
+            <h5 v-if="factura.user_id">Creada por : {{ factura.user_id.username ||0}}</h5>
+            <h5 v-if="factura.pago">tipo de pago : {{ factura.pago ||0}}</h5>
+            <h5 v-if="factura.nota">nota : {{ factura.nota ||0}}</h5>
+            <span>
+              fecha: <strong>{{ formatTime(factura.createdAt)||0 }}</strong>
+            </span>
+			
+
+   
+
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">producto</th>
+      <th scope="col">cantidad</th>
+      <th scope="col">precio</th>
+      <th scope="col">acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="(item, index) in factura.productos" :key="index">
+      <th scope="row">{{index +1}}</th>
+      <td style="max-width:20px">{{item.producto_id.descripcion}}</td>
+      <td>{{item.cantidad}}</td>
+      <td>{{item.precio}}</td>
+      <td>
+
+        <button  class="btn btn-primary" @click="eliminarStock(item.producto_id, item.ubicacion_id)">devolver articulo </button>
+      </td>
+    </tr>
+    
+  </tbody>
+</table>
+
+    
+			<!-- total : {{numeralFormat(total * venta.dolar)}} ({{total}}$) -->
+          </div>
+         <div class="card-footer">
+          <div class="d-flex justify-content-around">
+        <h4>total  = {{total}} </h4>
+        <h4>credito restante  = {{total-totalAbonos}} </h4>
+        <button class="btn btn-danger ml-5" @click="abrirModal"> abonos</button>
+
+          </div>
+      </div>
+        </div>
+      </div>
+      
     </div>
   </div>
   <NoAccess v-else/>
@@ -121,13 +181,39 @@ import ModalInfoFactura from "./ModalInfo.vue"
 import { useStore } from "vuex";
 import axios from "axios";
 import List from "./ventasList.vue";
+import formatDate from "moment"
+
 export default {
   props: ["param"],
   components: { List , NoAccess, ModalInfoFactura},
   setup() {
+    
+    function formatTime(time) {
+      return formatDate(time).format("lll");
+    }
+    let total = computed(()=>{
+      let element  = 0
+      
+        store.state.factura.productos.map((e)=> {
+      element += e.cantidad*e.precio
+        
+      })
+      return element
+       
+    })
+    let totalAbonos = computed(()=>{
+      let element  = 0
+        store.state.abonos.map((e)=> {
+      element += e.cantidad
+        
+      })
+      return element
+       
+    })
     let store = useStore();
     let api = computed(() => store.state.api);
     let usuario = computed(() => store.state.usuario);
+    let factura = computed(() => store.state.factura);
     let ventas = ref([]);
     let limit = ref(10);
     let page = ref(1);
@@ -156,8 +242,11 @@ export default {
 
       get();
     }
-    
+    function abrirModal() {
+      store.dispatch("cerrarModalInfo")
+    }
     async function getVentas() {
+      
         if (this.fechaInicio == null) return;
         if (this.fechaFinal == null) return;
         const { data } = await axios.get(
@@ -165,8 +254,37 @@ export default {
         )
         console.log(data)
       }
+async function eliminarStock(id, id_tienda) {
+  
+  const datos = {id_venta: factura.value._id, producto_id: id._id, id_tienda}
+  const {data} =await axios.post(
+    `${api.value}/ventas/edit`
+    , datos
+    )
+    
+    if (total.value == 0) {
+      
+     await axios.post(
+    `${api.value}/ventas/cancelar?id=${factura.value._id}`)
+    get()
+    
+    }
+    if (data.status) {
+    await  store.dispatch("getInfoVenta", data.result)
+    console.log(total);
+      if (total.value == 0) {
+        await axios.post(
+    `${api.value}/ventas/cancelar?id=${factura.value._id}`
+    
+    )
+      }
+      
+      get()
 
+}
+}
     async function get() {
+      
       ventas.value = []
       const { data } = await axios.get(
         `${api.value}/ventas/${limit.value}/${page.value}`
@@ -180,7 +298,7 @@ export default {
       }
     }
     get();
-    return { ventas,getVentas, lista, limit, page, getPage, previous, next, limitar, usuario };
+    return { totalAbonos,eliminarStock,abrirModal,ventas,getVentas, lista, limit, page, getPage, previous, next, limitar, usuario ,factura, formatTime, total};
   },
 };
 </script>

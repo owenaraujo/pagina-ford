@@ -100,10 +100,10 @@
             <router-view :param="search"></router-view>
 
             <footer class="sticky-footer bg-white">
-              <div class="container my-auto">
+              <div class="container my-auto ">
                
                 <div class="copyright text-center my-auto">
-                <Popper  class="dark-popper"
+                <Popper  class="dark-popper mb-3 "
                     arrow
                     hover
                     placement="left"

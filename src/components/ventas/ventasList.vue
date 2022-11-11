@@ -1,8 +1,10 @@
 <template>
-  <tr>
+  
+  <tr :class="{'text-muted':!venta.status,'text-dark':venta.status, 'table-active': venta._id == factura }">
   
     <td>{{ numeralFormat(venta.factura, "000000") }}</td>
     <td>{{ formatTime(venta.createdAt) }}</td>
+    <td>{{ venta.productos.length }}</td>
     <!-- <td>{{ total }}</td> -->
     <td>
       
@@ -34,6 +36,7 @@ export default {
     let store = useStore();
     let venta = ref(props.venta);
     let productos = venta.value;
+    let factura = computed(()=> store.state.factura._id)
     let modalInfo = computed(()=> store.state.modalInfo);
     function pdf() {
       store.dispatch("guardarVenta", venta.value);
@@ -52,7 +55,7 @@ export default {
       store.dispatch("getInfoVenta", e)
     }
 
-    return { total, pdf, formatTime, modalInfo, detalles, dolar };
+    return { total, pdf, formatTime, modalInfo, detalles, dolar , factura};
   },
 };
 </script>
