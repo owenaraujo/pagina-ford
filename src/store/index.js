@@ -78,8 +78,8 @@ export default createStore({
         transition: "bounce",
       },
     },
-    api: "http://93.189.88.179:3000/api",
-    api2: "http://localhost:3000/api",
+    api2: "http://93.189.88.179:3000/api",
+    api: "http://localhost:3000/api",
     sidebars: false,
     logged: false,
     token: null,
@@ -106,6 +106,11 @@ export default createStore({
     CerrarModalAbonos(state) {
       state.modalInfo = !state.modalInfo
     },
+    async buscarAbonos (state){
+      const {data}= await axios.get(`${state.api}/ventas/abonos/${state.factura._id}`)
+      state.abonos = data
+    },
+
  async   MostrarFactura(state, payload) {
       state.factura = payload
       console.log(payload._id);
@@ -240,6 +245,9 @@ export default createStore({
   },
 
   actions: {
+    findAbonos({commit}){
+commit("buscarAbonos")
+    },
     cerrarModalImg({ commit }) {
       commit("cerrarModalImage")
     },

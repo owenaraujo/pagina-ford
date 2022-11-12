@@ -1,7 +1,7 @@
 <template>
   <div v-if="usuario.rol.grado <= 2" class="container-fluid">
     <!-- aqui va el modal de info -->
-    <ModalInfoFactura></ModalInfoFactura>
+    <ModalInfoFactura :facturaTotal="total-totalAbonos"></ModalInfoFactura>
     <!-- Page Heading -->
     <input class="d-none" type="datetime-local" name="" id="">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -148,7 +148,7 @@
       <td>{{item.precio}}</td>
       <td>
 
-        <button  class="btn btn-primary" @click="eliminarStock(item.producto_id, item.ubicacion_id)">devolver articulo </button>
+        <button  class="btn btn-primary" @click="eliminarStock(item.producto_id, item.ubicacion_id,item.precio)">devolver articulo </button>
       </td>
     </tr>
     
@@ -182,6 +182,7 @@ import { useStore } from "vuex";
 import axios from "axios";
 import List from "./ventasList.vue";
 import formatDate from "moment"
+import { createToast } from "mosha-vue-toastify";
 
 export default {
   props: ["param"],
@@ -254,8 +255,10 @@ export default {
         )
         console.log(data)
       }
-async function eliminarStock(id, id_tienda) {
-  
+async function eliminarStock(id, id_tienda, resta) {
+  if (resta > (total.value-totalAbonos.value)) {
+    return createToast("no se puede eliminar el producto",)
+  }
   const datos = {id_venta: factura.value._id, producto_id: id._id, id_tienda}
   const {data} =await axios.post(
     `${api.value}/ventas/edit`
