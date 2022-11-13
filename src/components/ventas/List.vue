@@ -7,6 +7,25 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
       <h1 class="h3 mb-0 text-gray-800 text-center">Panel de Administración</h1>
     </div>
+   <div class="d-flex mb-2">
+    <select class="form-control mr-3" name="" v-model="pago" id=""  style="max-width: 120px ;">
+    <option :value="false">por pagar</option>
+    <option :value="true">pagos</option>
+    
+    </select>
+<div class="mr-2"> 
+  <Datepicker class="form-control" type="" v-model="fechaInicio"  />
+
+</div>
+<div class="mr-2">
+  <Datepicker class="form-control" type="" v-model="fechaFinal"  />
+
+</div>
+
+
+    <button class="btn btn-success" @click="get">buscar</button> 
+    <input type="number" class="form-control ml-auto"  placeholder="ingrese # factura" v-model="Numerofactura" style="max-width:200px ;">
+   </div>
     <div class="text-right mb-2">
       mostrar
       <div class="btn-group ml-2">
@@ -62,12 +81,10 @@
                 <th>Acciones</th>
               </tr>
             </thead>
-            {{
-              param
-            }}
+           
             <tbody>
               <List
-                v-show="venta.factura.toString().indexOf(param) != -1"
+                v-show="venta.factura.toString().indexOf(Numerofactura) != -1"
                 :venta="venta"
                 v-for="(venta, index) of ventas"
                 :key="index"
@@ -121,8 +138,9 @@
 
 
             <h5 v-if="factura.user_id">Creada por : {{ factura.user_id.username ||0}}</h5>
-            <h5 v-if="factura.pago">tipo de pago : {{ factura.pago ||0}}</h5>
-            <h5 v-if="factura.nota">nota : {{ factura.nota ||0}}</h5>
+            <h5 v-if="factura.cliente">Cliente : {{ factura.cliente ||0}}</h5>
+            <h5 v-if="factura.pago">Tipo de pago : {{ factura.pago ||0}}</h5>
+            <h5 v-if="factura.nota">Nota : {{ factura.nota ||0}}</h5>
             <span>
               fecha: <strong>{{ formatTime(factura.createdAt)||0 }}</strong>
             </span>
@@ -168,13 +186,13 @@
       </div>
         </div>
       </div>
-      
     </div>
   </div>
   <NoAccess v-else/>
 </template>
 
 <script>
+import Datepicker  from "vue3-datepicker"
 import { computed, ref } from "@vue/runtime-core";
 import NoAccess from "../403.vue"
 import ModalInfoFactura from "./ModalInfo.vue"
@@ -186,7 +204,7 @@ import { createToast } from "mosha-vue-toastify";
 
 export default {
   props: ["param"],
-  components: { List , NoAccess, ModalInfoFactura},
+  components: { List , NoAccess, ModalInfoFactura, Datepicker },
   setup() {
     
     function formatTime(time) {
@@ -218,6 +236,8 @@ export default {
     let ventas = ref([]);
     let limit = ref(10);
     let page = ref(1);
+    let fechaInicio = ref(new Date());
+    let fechaFinal = ref(new Date());
     let lista = ref([]);
     function limitar(num) {
       limit.value = num;
@@ -246,12 +266,13 @@ export default {
     function abrirModal() {
       store.dispatch("cerrarModalInfo")
     }
+    //funcion no esta en uso
     async function getVentas() {
       
         if (this.fechaInicio == null) return;
         if (this.fechaFinal == null) return;
         const { data } = await axios.get(
-          `${this.server}/ventas/get/${this.fechaInicio}/${this.fechaFinal}`
+          `${this.server}/ventas/get/${this.fechaInicio}/${this.fechaFinal}?pago=true`
         )
         console.log(data)
       }
@@ -286,11 +307,21 @@ async function eliminarStock(id, id_tienda, resta) {
 
 }
 }
+let Numerofactura = ref("")
+let pago = ref(false)
+let status = ref(false)
     async function get() {
-      
+     let facturaFind  = `&factura=${Numerofactura.value}`
+     let statusPago  = `pago=${pago.value}`
+     let statusFactura  = `&status=${status.value}`
+      if(!Numerofactura.value) facturaFind = ""
+      if(!statusFactura.value) statusFactura = ""
+    const date= formatDate(fechaInicio.value).format("yyy-MM-DD")
+    const date2= formatDate(fechaFinal.value).format("yyy-MM-DD")
+  
       ventas.value = []
       const { data } = await axios.get(
-        `${api.value}/ventas/${limit.value}/${page.value}`
+        `${api.value}/ventas/${limit.value}/${page.value}/${date}/${date2}?${statusPago}${facturaFind}${statusFactura}`
       );
       ventas.value = data.ventas;
       lista.value = [];
@@ -301,7 +332,7 @@ async function eliminarStock(id, id_tienda, resta) {
       }
     }
     get();
-    return { totalAbonos,eliminarStock,abrirModal,ventas,getVentas, lista, limit, page, getPage, previous, next, limitar, usuario ,factura, formatTime, total};
+    return {fechaFinal, get,status, pago, Numerofactura,totalAbonos,fechaInicio,eliminarStock,abrirModal,ventas,getVentas, lista, limit, page, getPage, previous, next, limitar, usuario ,factura, formatTime, total};
   },
 };
 </script>

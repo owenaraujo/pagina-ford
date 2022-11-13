@@ -8,6 +8,7 @@
               <select
                 @change="findProductos()"
                 id="ubicacion"
+                :disabled="stateProductos"
                 v-model="tienda"
                 name="ubicacion"
                 class="form-control"
@@ -198,6 +199,13 @@
                 class="form-control"
               />
               <input
+                v-model="cliente"
+                type="text"
+                id="cliente"
+                placeholder="cliente"
+                class="form-control mt-4"
+              />
+              <input
                 v-model="pago"
                 type=""
                 id=""
@@ -250,6 +258,7 @@ export default {
     let store = useStore();
     //ref
     let infoCliente = false;
+    let cliente = ref("");
     let modalVenta = ref(false);
     let buscarProducto = ref("");
     let inputsAgregar = ref({id_product:{
@@ -259,6 +268,8 @@ export default {
     let buscarClientes = ref("");
     let notaVenta = ref("");
     let pago = ref("");
+    let stateProductos = ref(false)
+
     let tienda = ref();
     let prestamo = ref(false);
     let productos = ref([]);
@@ -283,17 +294,20 @@ export default {
     
     
     store.dispatch("getUbicaciones");
-    
     //funciones
     async function findProductos() {
       const { data } = await axios.get(
         `${api.value}/productos/stock/${tienda.value}`
         );
         productos.value = data;
+        console.log(data.length);
+        if (data.length > 0) stateProductos.value = true
       }
       function newVenta() {
       store.dispatch("vaciarVenta");
       notaVenta.value = "";
+      cliente.value = "";
+      pago.value = "";
       prestamo.value = false;
       modalVenta.value = false;
       cancelVenta();
@@ -364,6 +378,7 @@ item.cantidad= total
     function guardarCompra() {
       // store.dispatch('generarPdf')
       store.dispatch("comprar", {
+        cliente: cliente.value,
         nota: notaVenta.value,
         credito: prestamo.value,
         pago: pago.value,
@@ -372,7 +387,9 @@ item.cantidad= total
     //acciones
     
     return {
+      stateProductos,
       tienda,
+      cliente,
       findProductos,
       usuario,
       infoCliente,

@@ -20,6 +20,7 @@
     "vue-numerals": "^4.0.6",
     "vue-popperjs": "^2.3.0",
     "vue-router": "^4.0.0-0",
+    "vue3-datepicker": "^0.3.4",
     "vue3-popper": "^1.0.2",
     "vuex": "^4.0.0-0"
   },

@@ -78,8 +78,8 @@ export default createStore({
         transition: "bounce",
       },
     },
-    api2: "http://93.189.88.179:3000/api",
-    api: "http://localhost:3000/api",
+    api: "http://93.189.88.179:3000/api",
+    api2: "http://localhost:3000/api",
     sidebars: false,
     logged: false,
     token: null,
@@ -385,7 +385,7 @@ commit("buscarAbonos")
 
       const newFactura = {
         user_id: user,
-      
+      cliente: nota.cliente,
         productos: productos,
         nota: nota.nota,
         TipoPago: nota.pago,
