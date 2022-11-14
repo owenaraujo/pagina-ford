@@ -78,8 +78,8 @@ export default createStore({
         transition: "bounce",
       },
     },
-    api: "http://93.189.88.179:3000/api",
-    api2: "http://localhost:3000/api",
+    api2: "http://93.189.88.179:3000/api",
+    api: "http://localhost:3000/api",
     sidebars: false,
     logged: false,
     token: null,
@@ -125,12 +125,9 @@ export default createStore({
       state.dataCliente = true;
     },
     saveProductos(state, payload) {
-      state.productos = payload;
-      let productos = payload.filter((item) =>
-        item.status === true ? item : 0
-      );
-
-      state.productosTrue = productos;
+     
+console.log(payload);
+      state.productosTrue = payload;
     },
     saveUbicaciones(state, payload) {
       state.ubicaciones = [];
@@ -221,20 +218,23 @@ export default createStore({
     },
     addProductoInicial(state, payload) {
       state.productosTrue.filter((item) =>
-        item._id.toString() == payload.id
+        item.id_product._id.toString() == payload.id
           ? (item.cantidad = item.cantidad + payload.cantidad)
           : 0
       );
     },
     resTotal(state, payload) {
-      state.productosVenta.filter((item) => {
+      state.productosVenta.filter((item, i) => {
+        
+        
         if (item.producto_id == payload.id) {
           state.productosTrue.filter((item) => {
-            if (item._id.toString() == payload.id) item.cantidad++;
+            
+            if (item.id_product._id.toString() == payload.id) item.cantidad++;
           });
           item.cantidad--;
           if (item.cantidad == 0)
-            state.productosVenta.splice(payload.indice, 1);
+            state.productosVenta.splice(i, 1);
         }
       });
     },
@@ -400,11 +400,12 @@ commit("buscarAbonos")
          state.ventaActual = data.data;
        }
     },
-    deleteStore({ state, commit }, indice) {
-      const cantidad = state.productosVenta[indice].cantidad;
-      const id = state.productosVenta[indice].producto_id;
-      commit("addProductoInicial", { cantidad: cantidad, id: id });
-      state.productosVenta.splice(indice, 1);
+    deleteStore({commit}, data) {
+      console.log();
+      // const cantidad = state.productosVenta[indice].cantidad;
+      // const id = state.productosVenta[indice].producto_id;
+       commit("resTotal", { cantidad: -1, id: data._id });
+      //  state.productosVenta.splice(indice, 1);
     },
     agregarToCarrito({ commit }, newVenta) {
        commit("saveToCar", newVenta);
@@ -412,8 +413,8 @@ commit("buscarAbonos")
     guardarCliente({ commit }, cliente) {
       commit("saveCliente", cliente);
     },
-    async getProductos({ commit, state }) {
-      const { data } = await axios.get(`${state.api}/productos`);
+    async getProductos({ commit},data) {
+      // const { data } = await axios.get(`${state.api}/productos`);
       commit("saveProductos", data);
     },
     proveedorStatus({ commit }, id) {

@@ -4,26 +4,26 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group form-floating mb-3 ">
-              <label>ubicacion</label>
-              <select
-                @change="findProductos()"
-                id="ubicacion"
-                :disabled="stateProductos"
-                v-model="tienda"
-                name="ubicacion"
-                class="form-control"
-              >
-                <option
-                  v-for="ubicacion in ubicaciones"
-                  :key="ubicacion"
-                  :value="ubicacion._id"
-                >
-                  {{ ubicacion.nombre }}
-                </option>
-              </select>
-            </div>
+          <label>ubicacion</label>
+          <select
+            @change="findProductos()"
+            id="ubicacion"
+            :disabled="stateProductos"
+            v-model="tienda"
+            name="ubicacion"
+            class="form-control"
+          >
+            <option
+              v-for="ubicacion in ubicaciones"
+              :key="ubicacion"
+              :value="ubicacion._id"
+            >
+              {{ ubicacion.nombre }}
+            </option>
+          </select>
+        </div>
         <h4 class="text-center">Datos Venta</h4>
-
+        
         <div class="table-responsive">
           <table ref="table" class="table table-hover">
             <thead class="thead-dark">
@@ -50,22 +50,22 @@
                   <div class="resultado2" v-if="buscarProducto">
                     <select multiple class="custom-select scrollbar-light-blue">
                       <option
-                        v-for="item in productos"
+                        v-for="item in productosTrue"
                         @click="selectProducto(item)"
                         :key="item._id"
                         :value="item._id"
                         v-show="
-
                           item.id_product.codigo
                             .toLowerCase()
                             .indexOf(buscarProducto.toLowerCase()) != -1 ||
-                            
-                          item.id_product.descripcion
-                            .toLowerCase()
-                            .indexOf(buscarProducto.toLowerCase()) != -1
+                            item.id_product.descripcion
+                              .toLowerCase()
+                              .indexOf(buscarProducto.toLowerCase()) != -1
                         "
                       >
-                        {{ item.id_product.descripcion }}-{{ item.id_product.codigo }}
+                        {{ item.id_product.descripcion }}-{{
+                          item.id_product.codigo
+                        }}
                       </option>
                     </select>
                   </div>
@@ -100,30 +100,35 @@
                 <th>Acciones</th>
               </tr>
             </thead>
-           
+
             <tbody id="detalle_venta">
               <tr v-for="(producto, index) in productosVenta" :key="index">
-    <th>{{ producto.codigo }}</th>
-    <th>{{ producto.productName }}</th>
-    
-    <th>{{ producto.cantidad }}</th>
-    <th>
-<div class="d-flex align-items-center">
-  <input type="number" class="form-control mr-2" style="max-width: 100px;" v-model.number="producto.precio"> =  {{producto.precio* producto.cantidad}}
+                <th>{{ producto.codigo }}</th>
+                <th>{{ producto.productName }}</th>
 
-</div>
-    </th>
-    
-  
+                <th>{{ producto.cantidad }}</th>
+                <th>
+                  <div class="d-flex align-items-center">
+                    <input
+                      type="number"
+                      class="form-control mr-2"
+                      style="max-width: 100px;"
+                      v-model.number="producto.precio"
+                    />
+                    = {{ producto.precio * producto.cantidad }}
+                  </div>
+                </th>
 
-    
-    <th>
-      <button @click="deleteProduct(indice)" class="btn btn-danger">
-        <i class="svg-inline--fa fas fa-trash-alt fa-w-14"></i> Eliminar
-      </button>
-    </th>
-  </tr>
-            
+                <th>
+                  <button
+                    @click="deleteProduct(producto.producto_id)"
+                    class="btn btn-danger"
+                  >
+                    <i class="svg-inline--fa fas fa-trash-alt fa-w-14"></i>
+                    Eliminar
+                  </button>
+                </th>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -252,28 +257,25 @@ import { computed, ref } from "@vue/reactivity";
 import { createToast } from "mosha-vue-toastify";
 export default {
   props: ["param"],
-  components: {  NoAccess },
+  components: { NoAccess },
   setup() {
-    //respuestas automaticas
+    
     let store = useStore();
-    //ref
+    //referencias
     let infoCliente = false;
     let cliente = ref("");
     let modalVenta = ref(false);
     let buscarProducto = ref("");
-    let inputsAgregar = ref({id_product:{
-
-    }});
+    let inputsAgregar = ref({ id_product: {} });
     let cantidad = ref(1);
     let buscarClientes = ref("");
     let notaVenta = ref("");
     let pago = ref("");
-    let stateProductos = ref(false)
-
+    let stateProductos = ref(false);
     let tienda = ref();
     let prestamo = ref(false);
     let productos = ref([]);
-    //computed
+    //propiedades computadas
     const ubicaciones = computed(() => store.state.ubicaciones);
     let toast = computed(() => store.state.toask);
     let usuario = computed(() => store.state.usuario);
@@ -281,29 +283,30 @@ export default {
     let statusVenta = computed(() => store.state.statusVenta);
     let api = computed(() => store.state.api);
     let clientes = computed(() => store.state.clientesActivos);
+    let productosTrue = computed(() => store.state.productosTrue);
     let total = computed(() => {
       let obj = inputsAgregar.value;
       let iva = ((obj.precio * obj.iva) / 100) * cantidad.value;
       let totalSinIva = obj.precio * cantidad.value;
-      
+
       if (!totalSinIva) totalSinIva = 0;
       if (!iva) iva = 0;
-      
+
       return totalSinIva + iva;
     });
-    
-    
+// funciones automaticas
     store.dispatch("getUbicaciones");
     //funciones
     async function findProductos() {
       const { data } = await axios.get(
         `${api.value}/productos/stock/${tienda.value}`
-        );
-        productos.value = data;
-        console.log(data.length);
-        if (data.length > 0) stateProductos.value = true
-      }
-      function newVenta() {
+      );
+      productos.value = data;
+      store.dispatch("getProductos", data);
+      console.log(data.length);
+      if (data.length > 0) stateProductos.value = true;
+    }
+    function newVenta() {
       store.dispatch("vaciarVenta");
       notaVenta.value = "";
       cliente.value = "";
@@ -328,7 +331,7 @@ export default {
           "no se puede hacer una venta vacia",
           toast.value.warning
         );
-      
+
       modalVenta.value = true;
     }
     function selectProducto(producto) {
@@ -340,37 +343,35 @@ export default {
         cantidad.value = inputsAgregar.value.cantidad;
     }
     function agregarCarrito() {
-      
       const data = {
         productName: inputsAgregar.value.id_product.descripcion,
-        
+
         codigo: inputsAgregar.value.id_product.codigo,
         cantidad: cantidad.value,
         producto_id: inputsAgregar.value.id_product._id,
-        ubicacion_id: tienda.value
-
+        ubicacion_id: tienda.value,
       };
       let carrito = productos.value.filter((item) => {
         if (item.id_product._id.toString() == data.producto_id.toString()) {
-          
           let total = item.cantidad - data.cantidad;
-item.cantidad= total
+          item.cantidad = total;
           if (total >= 0) {
-            -item.cantidad 
-            return item;}
-          else {
+            -item.cantidad;
+            return item;
+          } else {
             0;
           }
         }
       });
-      if (carrito.length > 0)  store.dispatch("agregarToCarrito", data);
+      if (carrito.length > 0) store.dispatch("agregarToCarrito", data);
     }
     function cancelVenta() {
       store.dispatch("deleteProccessVenta");
-      inputsAgregar.value = {id_product:{
-
-}}
+      inputsAgregar.value = { id_product: {} };
       cantidad.value = 1;
+    }
+    function deleteProduct(id) {
+      store.dispatch("deleteStore", { _id: id });
     }
     function generarPdf() {
       store.dispatch("generarPdf");
@@ -384,9 +385,11 @@ item.cantidad= total
         pago: pago.value,
       });
     }
-    //acciones
-    
+  
+
     return {
+      productosTrue,
+      deleteProduct,
       stateProductos,
       tienda,
       cliente,
@@ -403,7 +406,6 @@ item.cantidad= total
       ubicaciones,
       preGuardarCompra,
       guardarCompra,
-
       cancelVenta,
       agregarCarrito,
       productosVenta,
